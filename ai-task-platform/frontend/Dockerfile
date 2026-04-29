@@ -6,7 +6,7 @@ COPY src/ ./src/
 COPY public/ ./public/
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
-RUN npm run build
+RUN ./node_modules/.bin/react-scripts build
 
 FROM nginx:alpine
 COPY --from=builder /app/build /usr/share/nginx/html
