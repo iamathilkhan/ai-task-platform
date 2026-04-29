@@ -2,7 +2,7 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 COPY src/ ./src/
 COPY public/ ./public/
 ARG REACT_APP_API_URL
