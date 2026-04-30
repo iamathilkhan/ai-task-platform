@@ -8,21 +8,26 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [currentUser, setCurrentUser] = useState(null);
 
+  const decodeToken = (token) => {
+    try {
+      if (!token || typeof token !== 'string') return null;
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      const payload = parts[1];
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch (e) {
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-          atob(base64)
-            .split('')
-            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-            .join('')
-        );
-        setCurrentUser(JSON.parse(jsonPayload));
-      } catch (err) {
-        console.error("Failed to decode token", err);
+      const user = decodeToken(token);
+      if (user) {
+        setCurrentUser(user);
+      } else {
         setToken(null);
       }
     } else {
@@ -32,7 +37,9 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = (newToken) => {
-    setToken(newToken);
+    if (newToken) {
+      setToken(newToken);
+    }
   };
 
   const logout = () => {
